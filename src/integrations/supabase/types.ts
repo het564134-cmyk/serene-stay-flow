@@ -14,7 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+        }
+        Insert: {
+          amount: number
+          category?: string
+          created_at?: string
+          date?: string
+          description: string
+          id?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      guests: {
+        Row: {
+          check_in: string
+          check_out: string | null
+          created_at: string
+          id: string
+          id_proof: string
+          is_frequent: boolean | null
+          name: string
+          paid_amount: number
+          pending_amount: number
+          phone: string
+          room_id: string | null
+          room_number: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          check_in?: string
+          check_out?: string | null
+          created_at?: string
+          id?: string
+          id_proof: string
+          is_frequent?: boolean | null
+          name: string
+          paid_amount?: number
+          pending_amount?: number
+          phone: string
+          room_id?: string | null
+          room_number?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          check_in?: string
+          check_out?: string | null
+          created_at?: string
+          id?: string
+          id_proof?: string
+          is_frequent?: boolean | null
+          name?: string
+          paid_amount?: number
+          pending_amount?: number
+          phone?: string
+          room_id?: string | null
+          room_number?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guests_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          created_at: string
+          id: string
+          price: number
+          room_number: string
+          room_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          price?: number
+          room_number: string
+          room_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          price?: number
+          room_number?: string
+          room_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
