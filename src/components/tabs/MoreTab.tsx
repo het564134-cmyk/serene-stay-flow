@@ -9,7 +9,7 @@ import { useExpenses } from '@/hooks/useExpenses';
 import { format } from 'date-fns';
 
 export const MoreTab = () => {
-  const [activeSection, setActiveSection] = useState('room-management');
+  const [activeSection, setActiveSection] = useState('expenses');
   const [expenseForm, setExpenseForm] = useState({
     description: '',
     amount: '',
@@ -41,7 +41,6 @@ export const MoreTab = () => {
   };
 
   const sections = [
-    { id: 'room-management', label: 'Room Management', icon: Settings },
     { id: 'expenses', label: 'Expense Manager', icon: DollarSign },
     { id: 'pending-payments', label: 'Pending Payments', icon: AlertTriangle },
   ];
@@ -64,51 +63,6 @@ export const MoreTab = () => {
           </Button>
         ))}
       </div>
-
-      {/* Room Management */}
-      {activeSection === 'room-management' && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Room Management</h2>
-          {rooms.map((room) => (
-            <div key={room.id} className="glass-card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Room {room.room_number}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {room.room_type} • ₹{room.price}/night • {room.status}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <select
-                    value={room.status}
-                    onChange={(e) => updateRoom.mutate({ 
-                      id: room.id, 
-                      status: e.target.value as any 
-                    })}
-                    className="glass rounded px-2 py-1 text-sm"
-                  >
-                    <option value="Available">Available</option>
-                    <option value="Occupied">Occupied</option>
-                    <option value="Maintenance">Maintenance</option>
-                  </select>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="w-8 h-8 text-red-400 hover:text-red-300"
-                    onClick={() => {
-                      if (window.confirm('Delete this room?')) {
-                        deleteRoom.mutate(room.id);
-                      }
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* Expense Manager */}
       {activeSection === 'expenses' && (

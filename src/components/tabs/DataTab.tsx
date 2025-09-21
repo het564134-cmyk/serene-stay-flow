@@ -8,6 +8,19 @@ export const DataTab = () => {
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const { guests, isLoading } = useGuests();
 
+  // Get unique months that have data
+  const availableMonths = useMemo(() => {
+    if (!guests.length) return [];
+    
+    const months = new Set<string>();
+    guests.forEach(guest => {
+      const checkInDate = parseISO(guest.check_in);
+      months.add(format(checkInDate, 'yyyy-MM'));
+    });
+    
+    return Array.from(months).sort().reverse();
+  }, [guests]);
+
   const monthlyData = useMemo(() => {
     if (!guests.length) return {};
 
@@ -75,17 +88,20 @@ export const DataTab = () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {Array.from({ length: 12 }, (_, i) => {
-              const date = new Date();
-              date.setMonth(date.getMonth() - i);
-              const value = format(date, 'yyyy-MM');
-              const label = format(date, 'MMMM yyyy');
-              return (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              );
-            })}
+            {availableMonths.length > 0 ? (
+              availableMonths.map((month) => {
+                const label = format(new Date(month + '-01'), 'MMMM yyyy');
+                return (
+                  <SelectItem key={month} value={month}>
+                    {label}
+                  </SelectItem>
+                );
+              })
+            ) : (
+              <SelectItem value="no-data" disabled>
+                No data available
+              </SelectItem>
+            )}
           </SelectContent>
         </Select>
       </div>

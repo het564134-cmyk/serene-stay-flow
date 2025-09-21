@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { Plus, Search, Edit, Trash2, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useGuests } from '@/hooks/useGuests';
+import { useGuests, Guest } from '@/hooks/useGuests';
 import { AddGuestModal } from '@/components/modals/AddGuestModal';
+import { EditGuestModal } from '@/components/modals/EditGuestModal';
 import { format } from 'date-fns';
 
 export const GuestsTab = () => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const { guests, isLoading, deleteGuest, searchGuests } = useGuests();
 
@@ -17,6 +20,11 @@ export const GuestsTab = () => {
     if (window.confirm('Are you sure you want to delete this guest?')) {
       await deleteGuest.mutateAsync(id);
     }
+  };
+
+  const handleEditGuest = (guest: Guest) => {
+    setSelectedGuest(guest);
+    setShowEditModal(true);
   };
 
   if (isLoading) {
@@ -104,7 +112,12 @@ export const GuestsTab = () => {
               </div>
 
               <div className="flex gap-1 ml-4">
-                <Button variant="ghost" size="icon" className="w-8 h-8">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="w-8 h-8"
+                  onClick={() => handleEditGuest(guest)}
+                >
                   <Edit className="w-4 h-4" />
                 </Button>
                 <Button 
@@ -142,6 +155,15 @@ export const GuestsTab = () => {
       <AddGuestModal 
         isOpen={showAddModal} 
         onClose={() => setShowAddModal(false)} 
+      />
+      
+      <EditGuestModal 
+        isOpen={showEditModal} 
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedGuest(null);
+        }}
+        guest={selectedGuest}
       />
     </div>
   );
