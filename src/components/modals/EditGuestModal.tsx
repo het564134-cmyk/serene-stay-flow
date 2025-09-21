@@ -43,7 +43,7 @@ export const EditGuestModal = ({ isOpen, onClose, guest }: EditGuestModalProps) 
         name: guest.name,
         phone: guest.phone,
         id_proof: guest.id_proof,
-        room_id: guest.room_id || '',
+        room_id: guest.room_id || 'no-room',
         check_in: guest.check_in,
         check_out: guest.check_out || '',
         total_amount: guest.total_amount.toString(),
@@ -64,8 +64,8 @@ export const EditGuestModal = ({ isOpen, onClose, guest }: EditGuestModalProps) 
       name: formData.name,
       phone: formData.phone,
       id_proof: formData.id_proof,
-      room_id: formData.room_id || null,
-      room_number: allRooms.find(r => r.id === formData.room_id)?.room_number || null,
+      room_id: formData.room_id === 'no-room' ? null : formData.room_id || null,
+      room_number: formData.room_id === 'no-room' ? null : allRooms.find(r => r.id === formData.room_id)?.room_number || null,
       check_in: formData.check_in,
       total_amount: parseFloat(formData.total_amount || '0'),
       paid_amount: parseFloat(formData.paid_amount || '0'),
@@ -160,7 +160,7 @@ export const EditGuestModal = ({ isOpen, onClose, guest }: EditGuestModalProps) 
                 <SelectValue placeholder="Choose room" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No Room (Checked Out)</SelectItem>
+                <SelectItem value="no-room">No Room (Checked Out)</SelectItem>
                 {allRooms.map((room) => (
                   <SelectItem key={room.id} value={room.id}>
                     Room {room.room_number} ({room.room_type}) - ₹{room.price}/night
