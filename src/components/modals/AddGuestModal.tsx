@@ -23,6 +23,7 @@ export const AddGuestModal = ({ isOpen, onClose }: AddGuestModalProps) => {
     check_out: '',
     total_amount: '',
     paid_amount: '',
+    payment_mode: '',
   });
 
 const ID_PROOF_TYPES = [
@@ -32,6 +33,11 @@ const ID_PROOF_TYPES = [
   'Driving License',
   'Voter ID',
   'Other'
+];
+
+const PAYMENT_MODES = [
+  'Cash',
+  'Online'
 ];
 
   const { addGuest } = useGuests();
@@ -55,6 +61,7 @@ const ID_PROOF_TYPES = [
       total_amount: parseFloat(formData.total_amount || '0'),
       paid_amount: parseFloat(formData.paid_amount || '0'),
       pending_amount: pendingAmount,
+      payment_mode: formData.payment_mode,
     };
 
     if (formData.check_out) {
@@ -73,6 +80,7 @@ const ID_PROOF_TYPES = [
       check_out: '',
       total_amount: '',
       paid_amount: '',
+      payment_mode: '',
     });
     onClose();
   };
@@ -209,6 +217,25 @@ const ID_PROOF_TYPES = [
               placeholder="Enter paid amount"
               className="glass"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="payment_mode">Payment Mode</Label>
+            <Select 
+              value={formData.payment_mode} 
+              onValueChange={(value) => setFormData({ ...formData, payment_mode: value })}
+            >
+              <SelectTrigger className="glass">
+                <SelectValue placeholder="Select payment mode" />
+              </SelectTrigger>
+              <SelectContent>
+                {PAYMENT_MODES.map((mode) => (
+                  <SelectItem key={mode} value={mode}>
+                    {mode}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {pendingAmount > 0 && (

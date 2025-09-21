@@ -51,6 +51,7 @@ export type Database = {
           is_frequent: boolean | null
           name: string
           paid_amount: number
+          payment_mode: string | null
           pending_amount: number
           phone: string
           room_id: string | null
@@ -67,6 +68,7 @@ export type Database = {
           is_frequent?: boolean | null
           name: string
           paid_amount?: number
+          payment_mode?: string | null
           pending_amount?: number
           phone: string
           room_id?: string | null
@@ -83,6 +85,7 @@ export type Database = {
           is_frequent?: boolean | null
           name?: string
           paid_amount?: number
+          payment_mode?: string | null
           pending_amount?: number
           phone?: string
           room_id?: string | null

@@ -31,7 +31,7 @@ const Index = () => {
       {/* Header */}
       <header className="glass-card m-4 mb-0">
         <div className="flex items-center justify-between p-4">
-          <h1 className="text-xl font-bold neon-text">Guest House Manager</h1>
+          <h1 className="text-xl font-bold neon-text">Madhav Management</h1>
           <div className="text-sm text-muted-foreground">
             Professional Management System
           </div>
