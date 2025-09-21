@@ -1,12 +1,24 @@
 import { useState, useMemo } from 'react';
-import { Calendar, DollarSign } from 'lucide-react';
+import { Calendar, DollarSign, ChevronDown, ChevronUp } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useGuests } from '@/hooks/useGuests';
 import { format, startOfMonth, endOfMonth, isSameDay, parseISO } from 'date-fns';
 
 export const DataTab = () => {
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
-  const { guests, isLoading } = useGuests();
+  const [openDates, setOpenDates] = useState<Set<string>>(new Set());
+  const { guests, isLoading, error } = useGuests();
+
+  const toggleDate = (date: string) => {
+    const newOpenDates = new Set(openDates);
+    if (newOpenDates.has(date)) {
+      newOpenDates.delete(date);
+    } else {
+      newOpenDates.add(date);
+    }
+    setOpenDates(newOpenDates);
+  };
 
   // Get unique months that have data
   const availableMonths = useMemo(() => {
@@ -79,6 +91,18 @@ export const DataTab = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Calendar className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <p className="text-red-400 mb-2">Failed to load data</p>
+          <p className="text-sm text-muted-foreground">Please try refreshing the page</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 pb-20">
       <div className="flex items-center justify-between mb-6">
@@ -132,44 +156,67 @@ export const DataTab = () => {
         ) : (
           sortedDates.map(date => {
             const dayData = monthlyData[date];
+            const isOpen = openDates.has(date);
+            const dayName = format(new Date(date), 'EEEE');
+            const dateDisplay = format(new Date(date), 'MMMM dd, yyyy');
+            
             return (
-              <div key={date} className="glass-card">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">
-                    {format(new Date(date), 'EEEE, MMMM dd, yyyy')}
-                  </h3>
-                  <div className="flex gap-4 text-sm">
-                    <span className="text-green-400">
-                      <DollarSign className="w-4 h-4 inline mr-1" />
-                      ₹{dayData.totalReceived}
-                    </span>
-                    {dayData.totalPending > 0 && (
-                      <span className="text-red-400">
-                        Pending: ₹{dayData.totalPending}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  {dayData.guests.map((guest: any) => (
-                    <div key={guest.id} className="flex items-center justify-between p-3 glass rounded-lg">
-                      <div>
-                        <div className="font-medium">{guest.name}</div>
+              <Collapsible key={date} open={isOpen} onOpenChange={() => toggleDate(date)}>
+                <div className="glass-card">
+                  <CollapsibleTrigger className="w-full">
+                    <div className="flex items-center justify-between p-1 hover:bg-white/5 rounded transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          {isOpen ? (
+                            <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                          )}
+                          <div className="text-left">
+                            <h3 className="text-lg font-semibold">{dayName}</h3>
+                            <p className="text-sm text-muted-foreground">{dateDisplay}</p>
+                          </div>
+                        </div>
                         <div className="text-sm text-muted-foreground">
-                          Room {guest.room_number} • {guest.phone}
+                          {dayData.guests.length} guest{dayData.guests.length !== 1 ? 's' : ''}
                         </div>
                       </div>
-                      <div className="text-right text-sm">
-                        <div className="text-green-400">Paid: ₹{guest.paid_amount}</div>
-                        {guest.pending_amount > 0 && (
-                          <div className="text-red-400">Pending: ₹{guest.pending_amount}</div>
+                      <div className="flex gap-4 text-sm">
+                        <span className="text-green-400">
+                          <DollarSign className="w-4 h-4 inline mr-1" />
+                          ₹{dayData.totalReceived.toLocaleString()}
+                        </span>
+                        {dayData.totalPending > 0 && (
+                          <span className="text-red-400">
+                            Pending: ₹{dayData.totalPending.toLocaleString()}
+                          </span>
                         )}
                       </div>
                     </div>
-                  ))}
+                  </CollapsibleTrigger>
+
+                  <CollapsibleContent className="mt-4">
+                    <div className="space-y-2">
+                      {dayData.guests.map((guest: any) => (
+                        <div key={guest.id} className="flex items-center justify-between p-3 glass rounded-lg">
+                          <div>
+                            <div className="font-medium">{guest.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {guest.room_number ? `Room ${guest.room_number}` : 'No Room'} • {guest.phone}
+                            </div>
+                          </div>
+                          <div className="text-right text-sm">
+                            <div className="text-green-400">Paid: ₹{guest.paid_amount.toLocaleString()}</div>
+                            {guest.pending_amount > 0 && (
+                              <div className="text-red-400">Pending: ₹{guest.pending_amount.toLocaleString()}</div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CollapsibleContent>
                 </div>
-              </div>
+              </Collapsible>
             );
           })
         )}

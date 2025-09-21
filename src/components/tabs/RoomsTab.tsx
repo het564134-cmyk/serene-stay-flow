@@ -1,12 +1,25 @@
 import { useState } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useRooms } from '@/hooks/useRooms';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useRooms, type Room } from '@/hooks/useRooms';
 import { AddRoomModal } from '@/components/modals/AddRoomModal';
+import { EditRoomModal } from '@/components/modals/EditRoomModal';
 
 export const RoomsTab = () => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const { rooms, isLoading, deleteRoom } = useRooms();
+
+  const handleEditRoom = (room: Room) => {
+    setSelectedRoom(room);
+    setShowEditModal(true);
+  };
+
+  const handleDeleteRoom = (roomId: string) => {
+    deleteRoom.mutate(roomId);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -47,17 +60,42 @@ export const RoomsTab = () => {
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold">Room {room.room_number}</h3>
               <div className="flex gap-1">
-                <Button variant="ghost" size="icon" className="w-8 h-8">
-                  <Edit className="w-4 h-4" />
-                </Button>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="w-8 h-8 text-red-400 hover:text-red-300"
-                  onClick={() => deleteRoom.mutate(room.id)}
+                  className="w-8 h-8"
+                  onClick={() => handleEditRoom(room)}
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Edit className="w-4 h-4" />
                 </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="w-8 h-8 text-red-400 hover:text-red-300"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="glass-card border-0">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="neon-text">Delete Room</AlertDialogTitle>
+                      <AlertDialogDescription className="text-muted-foreground">
+                        Are you sure you want to delete Room {room.room_number}? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={() => handleDeleteRoom(room.id)}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
 
@@ -100,6 +138,15 @@ export const RoomsTab = () => {
       <AddRoomModal 
         isOpen={showAddModal} 
         onClose={() => setShowAddModal(false)} 
+      />
+      
+      <EditRoomModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedRoom(null);
+        }}
+        room={selectedRoom}
       />
     </div>
   );

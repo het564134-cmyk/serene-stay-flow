@@ -19,14 +19,24 @@ export const useRooms = () => {
   const roomsQuery = useQuery({
     queryKey: ['rooms'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('rooms')
-        .select('*')
-        .order('room_number');
-      
-      if (error) throw error;
-      return data as Room[];
+      try {
+        const { data, error } = await supabase
+          .from('rooms')
+          .select('*')
+          .order('room_number');
+        
+        if (error) {
+          console.error('Supabase error:', error);
+          throw new Error(`Database error: ${error.message}`);
+        }
+        return data as Room[];
+      } catch (error: any) {
+        console.error('Query error:', error);
+        throw error;
+      }
     },
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const addRoom = useMutation({
