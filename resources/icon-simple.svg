@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A9B8E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6BB6A8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+  
+  <!-- House base -->
+  <rect x="100" y="250" width="312" height="200" fill="#4A9B8E" stroke="#E67E22" stroke-width="8"/>
+  
+  <!-- Roof -->
+  <polygon points="80,250 256,120 432,250" fill="#E67E22"/>
+  
+  <!-- Chimney -->
+  <rect x="350" y="140" width="30" height="80" fill="#E67E22"/>
+  
+  <!-- Door -->
+  <rect x="200" y="350" width="60" height="100" rx="30" fill="#E67E22"/>
+  <circle cx="245" cy="400" r="4" fill="white"/>
+  
+  <!-- Windows -->
+  <rect x="280" y="300" width="80" height="60" fill="white" stroke="#4A9B8E" stroke-width="4"/>
+  <line x1="320" y1="300" x2="320" y2="360" stroke="#4A9B8E" stroke-width="2"/>
+  <line x1="280" y1="330" x2="360" y2="330" stroke="#4A9B8E" stroke-width="2"/>
+  
+  <!-- Heart -->
+  <path d="M256 180 C246 170, 230 170, 230 185 C230 200, 256 220, 256 220 C256 220, 282 200, 282 185 C282 170, 266 170, 256 180 Z" fill="#E67E22"/>
+</svg>

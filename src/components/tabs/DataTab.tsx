@@ -204,6 +204,17 @@ export const DataTab = () => {
                             <div className="text-sm text-muted-foreground">
                               {guest.room_number ? `Room ${guest.room_number}` : 'No Room'} • {guest.phone}
                             </div>
+                            {guest.payment_mode && (
+                              <div className="text-xs mt-1">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  guest.payment_mode === 'Cash' 
+                                    ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                                    : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                }`}>
+                                  {guest.payment_mode}
+                                </span>
+                              </div>
+                            )}
                           </div>
                           <div className="text-right text-sm">
                             <div className="text-green-400">Paid: ₹{guest.paid_amount.toLocaleString()}</div>
