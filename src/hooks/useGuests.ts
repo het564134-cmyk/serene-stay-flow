@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
 
 export interface Guest {
   id: string;
@@ -15,6 +16,8 @@ export interface Guest {
   paid_amount: number;
   pending_amount: number;
   is_frequent: boolean;
+  payment_mode?: string;
+  pay_to_whom?: string;
   created_at: string;
   updated_at: string;
 }
@@ -22,6 +25,26 @@ export interface Guest {
 export const useGuests = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Call the function to update expired checkouts when component mounts
+  useEffect(() => {
+    const updateExpiredCheckouts = async () => {
+      try {
+        const { error } = await supabase.rpc('update_expired_checkouts');
+        if (error) {
+          console.error('Error updating expired checkouts:', error);
+        } else {
+          // Refresh data after updating
+          queryClient.invalidateQueries({ queryKey: ['guests'] });
+          queryClient.invalidateQueries({ queryKey: ['rooms'] });
+        }
+      } catch (error) {
+        console.error('Error calling update_expired_checkouts:', error);
+      }
+    };
+
+    updateExpiredCheckouts();
+  }, [queryClient]);
 
   const guestsQuery = useQuery({
     queryKey: ['guests'],

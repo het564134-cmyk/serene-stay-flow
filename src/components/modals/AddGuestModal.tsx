@@ -24,6 +24,7 @@ export const AddGuestModal = ({ isOpen, onClose }: AddGuestModalProps) => {
     total_amount: '',
     paid_amount: '',
     payment_mode: '',
+    pay_to_whom: '',
   });
 
 const ID_PROOF_TYPES = [
@@ -35,10 +36,7 @@ const ID_PROOF_TYPES = [
   'Other'
 ];
 
-const PAYMENT_MODES = [
-  'Cash',
-  'Online'
-];
+const PAYMENT_MODES = ['Cash', 'Online'];
 
   const { addGuest } = useGuests();
   const { availableRooms } = useRooms();
@@ -61,7 +59,8 @@ const PAYMENT_MODES = [
       total_amount: parseFloat(formData.total_amount || '0'),
       paid_amount: parseFloat(formData.paid_amount || '0'),
       pending_amount: pendingAmount,
-      payment_mode: formData.payment_mode,
+      payment_mode: formData.payment_mode || null,
+      pay_to_whom: formData.payment_mode === 'Online' ? formData.pay_to_whom : null,
     };
 
     if (formData.check_out) {
@@ -81,6 +80,7 @@ const PAYMENT_MODES = [
       total_amount: '',
       paid_amount: '',
       payment_mode: '',
+      pay_to_whom: '',
     });
     onClose();
   };
@@ -237,6 +237,19 @@ const PAYMENT_MODES = [
               </SelectContent>
             </Select>
           </div>
+
+          {formData.payment_mode === 'Online' && (
+            <div>
+              <Label htmlFor="pay_to_whom">Pay To (Account Holder Name)</Label>
+              <Input
+                id="pay_to_whom"
+                value={formData.pay_to_whom}
+                onChange={(e) => setFormData({ ...formData, pay_to_whom: e.target.value })}
+                placeholder="Enter account holder name"
+                className="glass"
+              />
+            </div>
+          )}
 
           {pendingAmount > 0 && (
             <div className="text-sm text-yellow-400">

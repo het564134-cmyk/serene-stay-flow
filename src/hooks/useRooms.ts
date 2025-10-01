@@ -22,14 +22,21 @@ export const useRooms = () => {
       try {
         const { data, error } = await supabase
           .from('rooms')
-          .select('*')
-          .order('room_number');
+          .select('*');
         
         if (error) {
           console.error('Supabase error:', error);
           throw new Error(`Database error: ${error.message}`);
         }
-        return data as Room[];
+        
+        // Sort rooms numerically by room_number
+        const sortedData = (data as Room[]).sort((a, b) => {
+          const numA = parseInt(a.room_number);
+          const numB = parseInt(b.room_number);
+          return numA - numB;
+        });
+        
+        return sortedData;
       } catch (error: any) {
         console.error('Query error:', error);
         throw error;

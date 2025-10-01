@@ -51,6 +51,7 @@ export type Database = {
           is_frequent: boolean | null
           name: string
           paid_amount: number
+          pay_to_whom: string | null
           payment_mode: string | null
           pending_amount: number
           phone: string
@@ -68,6 +69,7 @@ export type Database = {
           is_frequent?: boolean | null
           name: string
           paid_amount?: number
+          pay_to_whom?: string | null
           payment_mode?: string | null
           pending_amount?: number
           phone: string
@@ -85,6 +87,7 @@ export type Database = {
           is_frequent?: boolean | null
           name?: string
           paid_amount?: number
+          pay_to_whom?: string | null
           payment_mode?: string | null
           pending_amount?: number
           phone?: string
@@ -138,7 +141,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_expired_checkouts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

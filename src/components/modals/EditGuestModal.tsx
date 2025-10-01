@@ -22,16 +22,21 @@ const ID_PROOF_TYPES = [
   'Other'
 ];
 
+const PAYMENT_MODES = ['Cash', 'Online'];
+
 export const EditGuestModal = ({ isOpen, onClose, guest }: EditGuestModalProps) => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     id_proof: '',
+    id_proof_type: '',
     room_id: '',
     check_in: '',
     check_out: '',
     total_amount: '',
     paid_amount: '',
+    payment_mode: '',
+    pay_to_whom: '',
   });
 
   const { updateGuest } = useGuests();
@@ -39,15 +44,23 @@ export const EditGuestModal = ({ isOpen, onClose, guest }: EditGuestModalProps) 
 
   useEffect(() => {
     if (guest) {
+      // Split id_proof into type and number
+      const idProofParts = guest.id_proof.split(':');
+      const idProofType = idProofParts[0]?.trim() || '';
+      const idProofNumber = idProofParts[1]?.trim() || guest.id_proof;
+      
       setFormData({
         name: guest.name,
         phone: guest.phone,
-        id_proof: guest.id_proof,
+        id_proof: idProofNumber,
+        id_proof_type: idProofType,
         room_id: guest.room_id || 'no-room',
         check_in: guest.check_in,
         check_out: guest.check_out || '',
         total_amount: guest.total_amount.toString(),
         paid_amount: guest.paid_amount.toString(),
+        payment_mode: guest.payment_mode || '',
+        pay_to_whom: guest.pay_to_whom || '',
       });
     }
   }, [guest]);
@@ -63,13 +76,15 @@ export const EditGuestModal = ({ isOpen, onClose, guest }: EditGuestModalProps) 
       id: guest.id,
       name: formData.name,
       phone: formData.phone,
-      id_proof: formData.id_proof,
+      id_proof: `${formData.id_proof_type}: ${formData.id_proof}`,
       room_id: formData.room_id === 'no-room' ? null : formData.room_id || null,
       room_number: formData.room_id === 'no-room' ? null : allRooms.find(r => r.id === formData.room_id)?.room_number || null,
       check_in: formData.check_in,
       total_amount: parseFloat(formData.total_amount || '0'),
       paid_amount: parseFloat(formData.paid_amount || '0'),
       pending_amount: pendingAmount,
+      payment_mode: formData.payment_mode || null,
+      pay_to_whom: formData.payment_mode === 'Online' ? formData.pay_to_whom : null,
     };
 
     if (formData.check_out) {
@@ -133,10 +148,10 @@ export const EditGuestModal = ({ isOpen, onClose, guest }: EditGuestModalProps) 
           </div>
 
           <div>
-            <Label htmlFor="id_proof">ID Proof</Label>
+            <Label htmlFor="id_proof_type">ID Proof Type</Label>
             <Select 
-              value={formData.id_proof} 
-              onValueChange={(value) => setFormData({ ...formData, id_proof: value })}
+              value={formData.id_proof_type} 
+              onValueChange={(value) => setFormData({ ...formData, id_proof_type: value })}
             >
               <SelectTrigger className="glass">
                 <SelectValue placeholder="Select ID proof type" />
@@ -149,6 +164,18 @@ export const EditGuestModal = ({ isOpen, onClose, guest }: EditGuestModalProps) 
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="id_proof">ID Proof Number</Label>
+            <Input
+              id="id_proof"
+              value={formData.id_proof}
+              onChange={(e) => setFormData({ ...formData, id_proof: e.target.value })}
+              placeholder="Enter ID proof number"
+              required
+              className="glass"
+            />
           </div>
 
           <div>
@@ -218,6 +245,38 @@ export const EditGuestModal = ({ isOpen, onClose, guest }: EditGuestModalProps) 
               />
             </div>
           </div>
+
+          <div>
+            <Label htmlFor="payment_mode">Payment Mode</Label>
+            <Select 
+              value={formData.payment_mode} 
+              onValueChange={(value) => setFormData({ ...formData, payment_mode: value })}
+            >
+              <SelectTrigger className="glass">
+                <SelectValue placeholder="Select payment mode" />
+              </SelectTrigger>
+              <SelectContent>
+                {PAYMENT_MODES.map((mode) => (
+                  <SelectItem key={mode} value={mode}>
+                    {mode}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {formData.payment_mode === 'Online' && (
+            <div>
+              <Label htmlFor="pay_to_whom">Pay To (Account Holder Name)</Label>
+              <Input
+                id="pay_to_whom"
+                value={formData.pay_to_whom}
+                onChange={(e) => setFormData({ ...formData, pay_to_whom: e.target.value })}
+                placeholder="Enter account holder name"
+                className="glass"
+              />
+            </div>
+          )}
 
           {pendingAmount > 0 && (
             <div className="text-sm text-yellow-400">
