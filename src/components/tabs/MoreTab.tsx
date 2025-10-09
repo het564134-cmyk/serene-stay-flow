@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, Settings, DollarSign, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Settings, DollarSign, AlertTriangle, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,6 +7,7 @@ import { useRooms } from '@/hooks/useRooms';
 import { useGuests } from '@/hooks/useGuests';
 import { useExpenses } from '@/hooks/useExpenses';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export const MoreTab = () => {
   const [activeSection, setActiveSection] = useState('expenses');
@@ -18,8 +19,9 @@ export const MoreTab = () => {
   });
 
   const { rooms, updateRoom, deleteRoom } = useRooms();
-  const { pendingGuests } = useGuests();
+  const { guests, pendingGuests } = useGuests();
   const { expenses, addExpense, deleteExpense } = useExpenses();
+  const { toast } = useToast();
 
   const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,9 +42,56 @@ export const MoreTab = () => {
     });
   };
 
+  const handleExportCSV = () => {
+    // Sort guests by check-in date
+    const sortedGuests = [...guests].sort((a, b) => 
+      new Date(a.check_in).getTime() - new Date(b.check_in).getTime()
+    );
+
+    // Create CSV header
+    const headers = ['Date', 'Guest Name', 'Room Number', 'Total Amount', 'Paid Amount', 'Pending Amount', 'Payment Mode', 'Pay To Whom'];
+    
+    // Create CSV rows
+    const rows = sortedGuests.map(guest => [
+      format(new Date(guest.check_in), 'dd/MM/yyyy'),
+      guest.name,
+      guest.room_number || 'N/A',
+      guest.total_amount,
+      guest.paid_amount,
+      guest.pending_amount,
+      guest.payment_mode || 'N/A',
+      guest.pay_to_whom || 'N/A'
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `guest-data-${format(new Date(), 'dd-MM-yyyy')}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: "Success",
+      description: "Guest data exported to CSV successfully",
+    });
+  };
+
   const sections = [
     { id: 'expenses', label: 'Expense Manager', icon: DollarSign },
     { id: 'pending-payments', label: 'Pending Payments', icon: AlertTriangle },
+    { id: 'export-csv', label: 'Export to CSV', icon: Download },
   ];
 
   return (
@@ -187,6 +236,42 @@ export const MoreTab = () => {
               <p className="text-muted-foreground">No pending payments found.</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Export to CSV */}
+      {activeSection === 'export-csv' && (
+        <div className="space-y-6">
+          <div className="glass-card">
+            <h2 className="text-lg font-semibold mb-4">Export Guest Data</h2>
+            <p className="text-muted-foreground mb-6">
+              Export all guest data including check-in dates, room numbers, payments, and payment modes to a CSV file.
+            </p>
+            <Button onClick={handleExportCSV} className="w-full sm:w-auto">
+              <Download className="w-4 h-4 mr-2" />
+              Export to CSV
+            </Button>
+          </div>
+
+          <div className="glass-card">
+            <h3 className="font-semibold mb-2">CSV File Includes:</h3>
+            <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+              <li>Check-in Date</li>
+              <li>Guest Name</li>
+              <li>Room Number</li>
+              <li>Total Amount</li>
+              <li>Paid Amount</li>
+              <li>Pending Amount</li>
+              <li>Payment Mode (Cash/Online)</li>
+              <li>Pay To Whom (for online payments)</li>
+            </ul>
+          </div>
+
+          <div className="glass-card bg-blue-500/10 border-blue-400/30">
+            <p className="text-sm text-blue-400">
+              💡 Data is sorted by check-in date from oldest to newest
+            </p>
+          </div>
         </div>
       )}
     </div>
