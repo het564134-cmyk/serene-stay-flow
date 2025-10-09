@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, Settings, DollarSign, AlertTriangle, Download } from 'lucide-react';
+import { Plus, Trash2, Settings, DollarSign, AlertTriangle, Download, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -85,6 +85,117 @@ export const MoreTab = () => {
     toast({
       title: "Success",
       description: "Guest data exported to CSV successfully",
+    });
+  };
+
+  const handlePrint = () => {
+    // Sort guests by check-in date
+    const sortedGuests = [...guests].sort((a, b) => 
+      new Date(a.check_in).getTime() - new Date(b.check_in).getTime()
+    );
+
+    // Create print window with formatted table
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast({
+        title: "Error",
+        description: "Please allow popups to print",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Guest Data - ${format(new Date(), 'dd/MM/yyyy')}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              color: #000;
+            }
+            h1 {
+              text-align: center;
+              margin-bottom: 10px;
+            }
+            .date {
+              text-align: center;
+              margin-bottom: 20px;
+              color: #666;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 12px;
+              text-align: left;
+            }
+            th {
+              background-color: #f2f2f2;
+              font-weight: bold;
+            }
+            tr:nth-child(even) {
+              background-color: #f9f9f9;
+            }
+            @media print {
+              body {
+                padding: 10px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Guest House Management - Guest Data</h1>
+          <div class="date">Generated on: ${format(new Date(), 'dd MMMM yyyy, HH:mm')}</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Guest Name</th>
+                <th>Room Number</th>
+                <th>Total Amount</th>
+                <th>Paid Amount</th>
+                <th>Pending Amount</th>
+                <th>Payment Mode</th>
+                <th>Pay To Whom</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sortedGuests.map(guest => `
+                <tr>
+                  <td>${format(new Date(guest.check_in), 'dd/MM/yyyy')}</td>
+                  <td>${guest.name}</td>
+                  <td>${guest.room_number || 'N/A'}</td>
+                  <td>₹${guest.total_amount}</td>
+                  <td>₹${guest.paid_amount}</td>
+                  <td>₹${guest.pending_amount}</td>
+                  <td>${guest.payment_mode || 'N/A'}</td>
+                  <td>${guest.pay_to_whom || 'N/A'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    
+    // Wait for content to load then print
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
+
+    toast({
+      title: "Success",
+      description: "Print dialog opened",
     });
   };
 
@@ -245,12 +356,18 @@ export const MoreTab = () => {
           <div className="glass-card">
             <h2 className="text-lg font-semibold mb-4">Export Guest Data</h2>
             <p className="text-muted-foreground mb-6">
-              Export all guest data including check-in dates, room numbers, payments, and payment modes to a CSV file.
+              Export all guest data including check-in dates, room numbers, payments, and payment modes to a CSV file or print it directly.
             </p>
-            <Button onClick={handleExportCSV} className="w-full sm:w-auto">
-              <Download className="w-4 h-4 mr-2" />
-              Export to CSV
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={handleExportCSV} className="flex-1 sm:flex-initial">
+                <Download className="w-4 h-4 mr-2" />
+                Export to CSV
+              </Button>
+              <Button onClick={handlePrint} variant="secondary" className="flex-1 sm:flex-initial">
+                <Printer className="w-4 h-4 mr-2" />
+                Print Data
+              </Button>
+            </div>
           </div>
 
           <div className="glass-card">
