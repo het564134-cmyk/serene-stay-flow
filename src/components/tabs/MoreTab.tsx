@@ -17,6 +17,10 @@ export const MoreTab = () => {
     category: 'General',
     date: new Date().toISOString().split('T')[0],
   });
+  const [dateRange, setDateRange] = useState({
+    from: '',
+    to: '',
+  });
 
   const { rooms, updateRoom, deleteRoom } = useRooms();
   const { guests, pendingGuests } = useGuests();
@@ -43,8 +47,21 @@ export const MoreTab = () => {
   };
 
   const handleExportCSV = () => {
+    // Filter guests by date range if specified
+    let filteredGuests = [...guests];
+    if (dateRange.from) {
+      filteredGuests = filteredGuests.filter(guest => 
+        new Date(guest.check_in) >= new Date(dateRange.from)
+      );
+    }
+    if (dateRange.to) {
+      filteredGuests = filteredGuests.filter(guest => 
+        new Date(guest.check_in) <= new Date(dateRange.to)
+      );
+    }
+    
     // Sort guests by check-in date
-    const sortedGuests = [...guests].sort((a, b) => 
+    const sortedGuests = filteredGuests.sort((a, b) => 
       new Date(a.check_in).getTime() - new Date(b.check_in).getTime()
     );
 
@@ -89,8 +106,21 @@ export const MoreTab = () => {
   };
 
   const handlePrint = () => {
+    // Filter guests by date range if specified
+    let filteredGuests = [...guests];
+    if (dateRange.from) {
+      filteredGuests = filteredGuests.filter(guest => 
+        new Date(guest.check_in) >= new Date(dateRange.from)
+      );
+    }
+    if (dateRange.to) {
+      filteredGuests = filteredGuests.filter(guest => 
+        new Date(guest.check_in) <= new Date(dateRange.to)
+      );
+    }
+    
     // Sort guests by check-in date
-    const sortedGuests = [...guests].sort((a, b) => 
+    const sortedGuests = filteredGuests.sort((a, b) => 
       new Date(a.check_in).getTime() - new Date(b.check_in).getTime()
     );
 
@@ -358,6 +388,42 @@ export const MoreTab = () => {
             <p className="text-muted-foreground mb-6">
               Export all guest data including check-in dates, room numbers, payments, and payment modes to a CSV file or print it directly.
             </p>
+            
+            <div className="space-y-4 mb-6">
+              <h3 className="font-medium">Filter by Date Range (Optional)</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="fromDate">From Date</Label>
+                  <Input
+                    id="fromDate"
+                    type="date"
+                    value={dateRange.from}
+                    onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+                    className="glass"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="toDate">To Date</Label>
+                  <Input
+                    id="toDate"
+                    type="date"
+                    value={dateRange.to}
+                    onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+                    className="glass"
+                  />
+                </div>
+              </div>
+              {(dateRange.from || dateRange.to) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDateRange({ from: '', to: '' })}
+                >
+                  Clear Date Filter
+                </Button>
+              )}
+            </div>
+            
             <div className="flex flex-wrap gap-3">
               <Button onClick={handleExportCSV} className="flex-1 sm:flex-initial">
                 <Download className="w-4 h-4 mr-2" />
