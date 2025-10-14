@@ -29,10 +29,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="glass-card m-4 mb-0">
-        <div className="flex items-center justify-between p-4">
-          <h1 className="text-xl font-bold neon-text">Madhav Management</h1>
-          <div className="text-sm text-muted-foreground">
+      <header className="glass-card m-3 sm:m-4 mb-0">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 gap-2">
+          <h1 className="text-lg sm:text-xl font-bold neon-text">Madhav Management</h1>
+          <div className="text-xs sm:text-sm text-muted-foreground">
             Professional Management System
           </div>
         </div>
