@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
 
 export interface Room {
   id: string;
@@ -15,6 +16,28 @@ export interface Room {
 export const useRooms = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Subscribe to realtime changes for rooms
+  useEffect(() => {
+    const channel = supabase
+      .channel('rooms-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'rooms'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['rooms'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const roomsQuery = useQuery({
     queryKey: ['rooms'],

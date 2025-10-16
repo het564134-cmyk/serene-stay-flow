@@ -26,6 +26,29 @@ export const useGuests = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Subscribe to realtime changes for guests
+  useEffect(() => {
+    const channel = supabase
+      .channel('guests-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'guests'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['guests'] });
+          queryClient.invalidateQueries({ queryKey: ['rooms'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   // Call the function to update expired checkouts when component mounts
   useEffect(() => {
     const updateExpiredCheckouts = async () => {
