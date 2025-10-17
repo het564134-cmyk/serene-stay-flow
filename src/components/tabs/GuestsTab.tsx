@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Star } from 'lucide-react';
+import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useGuests, Guest } from '@/hooks/useGuests';
@@ -66,9 +66,6 @@ export const GuestsTab = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-lg font-semibold">{guest.name}</h3>
-                  {guest.is_frequent && (
-                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                  )}
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">

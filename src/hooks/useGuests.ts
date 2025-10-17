@@ -100,17 +100,9 @@ export const useGuests = () => {
 
   const addGuest = useMutation({
     mutationFn: async (guest: Omit<Guest, 'id' | 'created_at' | 'updated_at' | 'is_frequent'>) => {
-      // Check if guest is frequent (existed before)
-      const { data: existingGuests } = await supabase
-        .from('guests')
-        .select('id')
-        .or(`phone.eq.${guest.phone},id_proof.eq.${guest.id_proof}`);
-
-      const is_frequent = (existingGuests?.length || 0) > 0;
-
       const { data, error } = await supabase
         .from('guests')
-        .insert([{ ...guest, is_frequent }])
+        .insert([{ ...guest, is_frequent: false }])
         .select()
         .single();
       
