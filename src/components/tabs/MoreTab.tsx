@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, Settings, DollarSign, AlertTriangle, Download, Printer, FileText } from 'lucide-react';
+import { Plus, Trash2, Settings, DollarSign, AlertTriangle, Download, Printer, FileText, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,17 @@ import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { saveFileNatively, isNativePlatform } from '@/utils/nativeFileHandler';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { supabase } from '@/integrations/supabase/client';
 
 export const MoreTab = () => {
   const [activeSection, setActiveSection] = useState('expenses');
@@ -25,6 +36,10 @@ export const MoreTab = () => {
     to: '',
   });
   const [isExporting, setIsExporting] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
+  const [clearType, setClearType] = useState<'all' | 'guests' | 'rooms'>('all');
+  const [isClearing, setIsClearing] = useState(false);
 
   const { rooms, updateRoom, deleteRoom } = useRooms();
   const { guests, pendingGuests } = useGuests();
@@ -424,10 +439,81 @@ export const MoreTab = () => {
     }
   };
 
+  const handleClearDataRequest = (type: 'all' | 'guests' | 'rooms') => {
+    setClearType(type);
+    setClearDialogOpen(true);
+  };
+
+  const handleClearData = async () => {
+    setIsClearing(true);
+    try {
+      // Verify password from Supabase
+      const { data: settings, error: settingsError } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'admin_password')
+        .single();
+
+      if (settingsError) throw new Error('Failed to verify password');
+
+      if (settings.value !== passwordInput) {
+        toast({
+          title: "Error",
+          description: "Incorrect password",
+          variant: "destructive",
+        });
+        setIsClearing(false);
+        return;
+      }
+
+      // Clear data based on type
+      if (clearType === 'all' || clearType === 'guests') {
+        const { error: guestsError } = await supabase
+          .from('guests')
+          .delete()
+          .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+        
+        if (guestsError) throw new Error('Failed to clear guest data');
+      }
+
+      if (clearType === 'all' || clearType === 'rooms') {
+        // First clear room assignments in guests
+        await supabase
+          .from('guests')
+          .update({ room_id: null, room_number: null })
+          .neq('id', '00000000-0000-0000-0000-000000000000');
+
+        const { error: roomsError } = await supabase
+          .from('rooms')
+          .delete()
+          .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+        
+        if (roomsError) throw new Error('Failed to clear room data');
+      }
+
+      toast({
+        title: "Success",
+        description: `${clearType === 'all' ? 'All data' : clearType === 'guests' ? 'Guest data' : 'Room data'} cleared successfully`,
+      });
+
+      setClearDialogOpen(false);
+      setPasswordInput('');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to clear data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   const sections = [
     { id: 'expenses', label: 'Expense Manager', icon: DollarSign },
     { id: 'pending-payments', label: 'Pending Payments', icon: AlertTriangle },
     { id: 'export-data', label: 'Export Data', icon: Download },
+    { id: 'clear-data', label: 'Clear Data', icon: Database },
   ];
 
   return (
@@ -435,7 +521,7 @@ export const MoreTab = () => {
       <h1 className="text-xl sm:text-2xl font-bold neon-text mb-4 sm:mb-6">More Options</h1>
 
       {/* Section Navigation */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4 sm:mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 sm:mb-6">
         {sections.map(({ id, label, icon: Icon }) => (
           <Button
             key={id}
@@ -689,6 +775,110 @@ export const MoreTab = () => {
           </div>
         </div>
       )}
+
+      {/* Clear Data Section */}
+      {activeSection === 'clear-data' && (
+        <div className="space-y-4">
+          <div className="glass-card bg-red-500/10 border-red-400/30">
+            <h2 className="text-lg font-semibold mb-4 text-red-400">⚠️ Clear Data</h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              This action will permanently delete data from the database. This cannot be undone.
+              Password verification is required.
+            </p>
+
+            <div className="space-y-3">
+              <Button
+                onClick={() => handleClearDataRequest('guests')}
+                variant="destructive"
+                className="w-full h-11"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear Guest Data
+              </Button>
+
+              <Button
+                onClick={() => handleClearDataRequest('rooms')}
+                variant="destructive"
+                className="w-full h-11"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear Room Data
+              </Button>
+
+              <Button
+                onClick={() => handleClearDataRequest('all')}
+                variant="destructive"
+                className="w-full h-11 bg-red-600 hover:bg-red-700"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear All Data
+              </Button>
+            </div>
+          </div>
+
+          <div className="glass-card">
+            <h3 className="text-base font-semibold mb-2">What Gets Cleared:</h3>
+            <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+              <li><strong>Guest Data:</strong> All guest records and check-in history</li>
+              <li><strong>Room Data:</strong> All room records (guest assignments will be cleared first)</li>
+              <li><strong>All Data:</strong> Both guests and rooms data</li>
+              <li className="text-yellow-400 mt-2">⚠️ Expense data is NOT cleared by these actions</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Password Verification Dialog */}
+      <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Data Deletion</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are about to permanently delete{' '}
+              <strong className="text-red-400">
+                {clearType === 'all' ? 'ALL DATA' : clearType === 'guests' ? 'GUEST DATA' : 'ROOM DATA'}
+              </strong>
+              . This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="my-4">
+            <Label htmlFor="password" className="text-sm">Enter Admin Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              placeholder="Enter password"
+              className="glass h-11"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && passwordInput) {
+                  handleClearData();
+                }
+              }}
+            />
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => {
+                setPasswordInput('');
+                setClearDialogOpen(false);
+              }}
+              disabled={isClearing}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearData}
+              disabled={!passwordInput || isClearing}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isClearing ? 'Clearing...' : 'Clear Data'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
