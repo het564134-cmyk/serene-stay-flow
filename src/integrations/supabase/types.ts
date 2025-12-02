@@ -141,10 +141,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      update_expired_checkouts: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      update_expired_checkouts: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
