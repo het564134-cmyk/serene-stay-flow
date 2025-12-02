@@ -48,15 +48,15 @@ const PAYMENT_MODES = ['Cash', 'Online'];
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // For Entry tab, we don't require phone and ID proof
+    // For Entry tab, we don't require phone, ID proof, and name
     if (activeTab === 'entry') {
-      if (!formData.name || !formData.room_id) return;
+      if (!formData.room_id) return;
     } else {
       if (!formData.name || !formData.phone || !formData.id_proof || !formData.id_proof_type || !formData.room_id) return;
     }
 
     const guestData: any = {
-      name: formData.name,
+      name: activeTab === 'entry' ? `Guest - Room ${selectedRoom?.room_number}` : formData.name,
       phone: activeTab === 'entry' ? formData.phone || 'N/A' : formData.phone,
       id_proof: activeTab === 'entry' 
         ? 'Entry Mode' 
@@ -291,18 +291,6 @@ const PAYMENT_MODES = ['Cash', 'Online'];
           ) : (
             <>
               {/* Entry Tab - Simplified Fields */}
-              <div>
-                <Label htmlFor="name_entry">Guest Name</Label>
-                <Input
-                  id="name_entry"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Enter guest name"
-                  required
-                  className="glass"
-                />
-              </div>
-
               <div>
                 <Label htmlFor="room_entry">Select Room</Label>
                 <Select value={formData.room_id} onValueChange={(value) => 
