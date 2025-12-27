@@ -169,11 +169,10 @@ export const MoreTab = () => {
         doc.text(dateFilter, 14, 36);
       }
 
-      // Prepare table data
+      // Prepare table data (without Room column)
       const tableData = sortedGuests.map(guest => [
         format(new Date(guest.check_in), 'dd/MM/yyyy'),
         guest.name,
-        guest.room_number || 'N/A',
         `₹${guest.total_amount}`,
         `₹${guest.paid_amount}`,
         `₹${guest.pending_amount}`,
@@ -181,9 +180,18 @@ export const MoreTab = () => {
         guest.pay_to_whom || 'N/A'
       ]);
 
+      // Calculate totals by payment mode
+      const totalCash = sortedGuests
+        .filter(g => g.payment_mode?.toLowerCase() === 'cash')
+        .reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+      const totalOnline = sortedGuests
+        .filter(g => g.payment_mode?.toLowerCase() === 'online')
+        .reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+      const grandTotal = sortedGuests.reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+
       // Add table
       autoTable(doc, {
-        head: [['Date', 'Guest Name', 'Room', 'Total', 'Paid', 'Pending', 'Mode', 'Pay To']],
+        head: [['Date', 'Guest Name', 'Total', 'Paid', 'Pending', 'Mode', 'Pay To']],
         body: tableData,
         startY: dateRange.from || dateRange.to ? 42 : 36,
         theme: 'striped',
@@ -213,6 +221,18 @@ export const MoreTab = () => {
           );
         },
       });
+
+      // Add totals summary after table
+      const finalY = (doc as any).lastAutoTable.finalY || 50;
+      doc.setFontSize(11);
+      doc.setTextColor(40, 40, 40);
+      doc.text('Payment Summary:', 14, finalY + 10);
+      doc.setFontSize(10);
+      doc.text(`Total Paid (Cash): ₹${totalCash.toLocaleString()}`, 14, finalY + 18);
+      doc.text(`Total Paid (Online): ₹${totalOnline.toLocaleString()}`, 14, finalY + 25);
+      doc.setFontSize(11);
+      doc.setTextColor(59, 130, 246);
+      doc.text(`Grand Total Paid: ₹${grandTotal.toLocaleString()}`, 14, finalY + 34);
 
       // Convert PDF to blob/base64 based on platform
       if (isNativePlatform()) {
@@ -280,7 +300,6 @@ export const MoreTab = () => {
         const tableData = sortedGuests.map(guest => [
           format(new Date(guest.check_in), 'dd/MM/yyyy'),
           guest.name,
-          guest.room_number || 'N/A',
           `₹${guest.total_amount}`,
           `₹${guest.paid_amount}`,
           `₹${guest.pending_amount}`,
@@ -288,13 +307,34 @@ export const MoreTab = () => {
           guest.pay_to_whom || 'N/A'
         ]);
 
+        // Calculate totals by payment mode
+        const totalCash = sortedGuests
+          .filter(g => g.payment_mode?.toLowerCase() === 'cash')
+          .reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+        const totalOnline = sortedGuests
+          .filter(g => g.payment_mode?.toLowerCase() === 'online')
+          .reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+        const grandTotal = sortedGuests.reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+
         autoTable(doc, {
-          head: [['Date', 'Guest Name', 'Room', 'Total', 'Paid', 'Pending', 'Mode', 'Pay To']],
+          head: [['Date', 'Guest Name', 'Total', 'Paid', 'Pending', 'Mode', 'Pay To']],
           body: tableData,
           startY: 36,
           theme: 'striped',
           headStyles: { fillColor: [59, 130, 246] },
         });
+
+        // Add totals summary after table
+        const finalY = (doc as any).lastAutoTable.finalY || 50;
+        doc.setFontSize(11);
+        doc.setTextColor(40, 40, 40);
+        doc.text('Payment Summary:', 14, finalY + 10);
+        doc.setFontSize(10);
+        doc.text(`Total Paid (Cash): ₹${totalCash.toLocaleString()}`, 14, finalY + 18);
+        doc.text(`Total Paid (Online): ₹${totalOnline.toLocaleString()}`, 14, finalY + 25);
+        doc.setFontSize(11);
+        doc.setTextColor(59, 130, 246);
+        doc.text(`Grand Total Paid: ₹${grandTotal.toLocaleString()}`, 14, finalY + 34);
 
         const pdfData = doc.output('datauristring').split(',')[1];
         const filename = `print-guest-data-${format(new Date(), 'dd-MM-yyyy')}.pdf`;
@@ -334,6 +374,15 @@ export const MoreTab = () => {
       const sortedGuests = filteredGuests.sort((a, b) => 
         new Date(a.check_in).getTime() - new Date(b.check_in).getTime()
       );
+
+      // Calculate totals by payment mode
+      const totalCash = sortedGuests
+        .filter(g => g.payment_mode?.toLowerCase() === 'cash')
+        .reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+      const totalOnline = sortedGuests
+        .filter(g => g.payment_mode?.toLowerCase() === 'online')
+        .reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+      const grandTotal = sortedGuests.reduce((sum, g) => sum + (g.paid_amount || 0), 0);
 
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
@@ -397,7 +446,6 @@ export const MoreTab = () => {
                 <tr>
                   <th>Date</th>
                   <th>Guest Name</th>
-                  <th>Room Number</th>
                   <th>Total Amount</th>
                   <th>Paid Amount</th>
                   <th>Pending Amount</th>
@@ -410,7 +458,6 @@ export const MoreTab = () => {
                   <tr>
                     <td>${format(new Date(guest.check_in), 'dd/MM/yyyy')}</td>
                     <td>${guest.name}</td>
-                    <td>${guest.room_number || 'N/A'}</td>
                     <td>₹${guest.total_amount}</td>
                     <td>₹${guest.paid_amount}</td>
                     <td>₹${guest.pending_amount}</td>
@@ -420,6 +467,12 @@ export const MoreTab = () => {
                 `).join('')}
               </tbody>
             </table>
+            <div style="margin-top: 20px; padding: 15px; background-color: #f5f7fa; border-radius: 8px;">
+              <h3 style="margin: 0 0 10px 0; color: #333;">Payment Summary</h3>
+              <p style="margin: 5px 0; color: #555;">Total Paid (Cash): ₹${totalCash.toLocaleString()}</p>
+              <p style="margin: 5px 0; color: #555;">Total Paid (Online): ₹${totalOnline.toLocaleString()}</p>
+              <p style="margin: 10px 0 0 0; font-weight: bold; color: #3b82f6; font-size: 16px;">Grand Total Paid: ₹${grandTotal.toLocaleString()}</p>
+            </div>
           </body>
         </html>
       `;
