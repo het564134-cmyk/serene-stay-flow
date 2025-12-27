@@ -72,30 +72,22 @@ export const useGuests = () => {
   const guestsQuery = useQuery({
     queryKey: ['guests'],
     queryFn: async () => {
-      try {
-        const { data, error } = await supabase
-          .from('guests')
-          .select(`
-            *,
-            rooms (
-              room_number,
-              room_type
-            )
-          `)
-          .order('created_at', { ascending: false });
-        
-        if (error) {
-          console.error('Supabase error:', error);
-          throw new Error(`Database error: ${error.message}`);
-        }
-        return data as Guest[];
-      } catch (error: any) {
-        console.error('Query error:', error);
-        throw error;
-      }
+      const { data, error } = await supabase
+        .from('guests')
+        .select(`
+          *,
+          rooms (
+            room_number,
+            room_type
+          )
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as Guest[];
     },
-    retry: 3,
-    retryDelay: 1000,
+    staleTime: 30000, // Data stays fresh for 30 seconds
+    gcTime: 300000, // Cache for 5 minutes
   });
 
   const addGuest = useMutation({

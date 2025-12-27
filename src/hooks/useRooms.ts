@@ -42,31 +42,21 @@ export const useRooms = () => {
   const roomsQuery = useQuery({
     queryKey: ['rooms'],
     queryFn: async () => {
-      try {
-        const { data, error } = await supabase
-          .from('rooms')
-          .select('*');
-        
-        if (error) {
-          console.error('Supabase error:', error);
-          throw new Error(`Database error: ${error.message}`);
-        }
-        
-        // Sort rooms numerically by room_number
-        const sortedData = (data as Room[]).sort((a, b) => {
-          const numA = parseInt(a.room_number);
-          const numB = parseInt(b.room_number);
-          return numA - numB;
-        });
-        
-        return sortedData;
-      } catch (error: any) {
-        console.error('Query error:', error);
-        throw error;
-      }
+      const { data, error } = await supabase
+        .from('rooms')
+        .select('*');
+      
+      if (error) throw error;
+      
+      // Sort rooms numerically by room_number
+      return (data as Room[]).sort((a, b) => {
+        const numA = parseInt(a.room_number);
+        const numB = parseInt(b.room_number);
+        return numA - numB;
+      });
     },
-    retry: 3,
-    retryDelay: 1000,
+    staleTime: 30000, // Data stays fresh for 30 seconds
+    gcTime: 300000, // Cache for 5 minutes
   });
 
   const addRoom = useMutation({
