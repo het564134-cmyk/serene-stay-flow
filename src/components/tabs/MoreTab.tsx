@@ -86,14 +86,13 @@ export const MoreTab = () => {
         new Date(a.check_in).getTime() - new Date(b.check_in).getTime()
       );
 
-      // Create CSV header
-      const headers = ['Date', 'Guest Name', 'Room Number', 'Total Amount', 'Paid Amount', 'Pending Amount', 'Payment Mode', 'Pay To Whom'];
+      // Create CSV header (without Room Number)
+      const headers = ['Date', 'Guest Name', 'Total Amount', 'Paid Amount', 'Pending Amount', 'Payment Mode', 'Pay To Whom'];
       
       // Create CSV rows
       const rows = sortedGuests.map(guest => [
         format(new Date(guest.check_in), 'dd/MM/yyyy'),
         guest.name,
-        guest.room_number || 'N/A',
         guest.total_amount,
         guest.paid_amount,
         guest.pending_amount,
@@ -180,14 +179,14 @@ export const MoreTab = () => {
         guest.pay_to_whom || 'N/A'
       ]);
 
-      // Calculate totals by payment mode
+      // Calculate totals by payment mode (case-insensitive matching)
       const totalCash = sortedGuests
         .filter(g => g.payment_mode?.toLowerCase() === 'cash')
-        .reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+        .reduce((sum, g) => sum + Number(g.paid_amount || 0), 0);
       const totalOnline = sortedGuests
         .filter(g => g.payment_mode?.toLowerCase() === 'online')
-        .reduce((sum, g) => sum + (g.paid_amount || 0), 0);
-      const grandTotal = sortedGuests.reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+        .reduce((sum, g) => sum + Number(g.paid_amount || 0), 0);
+      const grandTotal = sortedGuests.reduce((sum, g) => sum + Number(g.paid_amount || 0), 0);
 
       // Add table
       autoTable(doc, {
@@ -307,14 +306,14 @@ export const MoreTab = () => {
           guest.pay_to_whom || 'N/A'
         ]);
 
-        // Calculate totals by payment mode
+        // Calculate totals by payment mode (case-insensitive matching)
         const totalCash = sortedGuests
           .filter(g => g.payment_mode?.toLowerCase() === 'cash')
-          .reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+          .reduce((sum, g) => sum + Number(g.paid_amount || 0), 0);
         const totalOnline = sortedGuests
           .filter(g => g.payment_mode?.toLowerCase() === 'online')
-          .reduce((sum, g) => sum + (g.paid_amount || 0), 0);
-        const grandTotal = sortedGuests.reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+          .reduce((sum, g) => sum + Number(g.paid_amount || 0), 0);
+        const grandTotal = sortedGuests.reduce((sum, g) => sum + Number(g.paid_amount || 0), 0);
 
         autoTable(doc, {
           head: [['Date', 'Guest Name', 'Total', 'Paid', 'Pending', 'Mode', 'Pay To']],
@@ -375,14 +374,14 @@ export const MoreTab = () => {
         new Date(a.check_in).getTime() - new Date(b.check_in).getTime()
       );
 
-      // Calculate totals by payment mode
+      // Calculate totals by payment mode (case-insensitive matching)
       const totalCash = sortedGuests
         .filter(g => g.payment_mode?.toLowerCase() === 'cash')
-        .reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+        .reduce((sum, g) => sum + Number(g.paid_amount || 0), 0);
       const totalOnline = sortedGuests
         .filter(g => g.payment_mode?.toLowerCase() === 'online')
-        .reduce((sum, g) => sum + (g.paid_amount || 0), 0);
-      const grandTotal = sortedGuests.reduce((sum, g) => sum + (g.paid_amount || 0), 0);
+        .reduce((sum, g) => sum + Number(g.paid_amount || 0), 0);
+      const grandTotal = sortedGuests.reduce((sum, g) => sum + Number(g.paid_amount || 0), 0);
 
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
@@ -720,7 +719,7 @@ export const MoreTab = () => {
           <div className="glass-card">
             <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Export Guest Data</h2>
             <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
-              Export all guest data including check-in dates, room numbers, payments, and payment modes.
+              Export all guest data including check-in dates, payments, and payment modes.
               {isNativePlatform() && (
                 <span className="block mt-2 text-blue-400">
                   📱 On mobile, you can choose where to save the file using the share dialog.
@@ -802,12 +801,12 @@ export const MoreTab = () => {
             <ul className="list-disc list-inside text-xs sm:text-sm text-muted-foreground space-y-1">
               <li>Check-in Date</li>
               <li>Guest Name</li>
-              <li>Room Number</li>
               <li>Total Amount</li>
               <li>Paid Amount</li>
               <li>Pending Amount</li>
               <li>Payment Mode (Cash/Online)</li>
               <li>Pay To Whom (for online payments)</li>
+              <li>Payment Summary (Cash, Online, Grand Total)</li>
             </ul>
           </div>
 

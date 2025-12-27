@@ -22,6 +22,7 @@ export const AddGuestModal = ({ isOpen, onClose }: AddGuestModalProps) => {
     room_id: '',
     check_in: new Date().toISOString().split('T')[0],
     check_out: '',
+    check_out_time: '',
     total_amount: '',
     paid_amount: '',
     payment_mode: '',
@@ -85,6 +86,7 @@ const PAYMENT_MODES = ['Cash', 'Online'];
       room_id: '',
       check_in: new Date().toISOString().split('T')[0],
       check_out: '',
+      check_out_time: '',
       total_amount: '',
       paid_amount: '',
       payment_mode: '',
@@ -332,6 +334,23 @@ const PAYMENT_MODES = ['Cash', 'Online'];
                   />
                 </div>
               </div>
+
+              {formData.check_out && (
+                <div>
+                  <Label htmlFor="check_out_time_entry">Check-out Time (Optional)</Label>
+                  <Input
+                    id="check_out_time_entry"
+                    type="time"
+                    value={formData.check_out_time}
+                    onChange={(e) => setFormData({ ...formData, check_out_time: e.target.value })}
+                    placeholder="If not set, treated as full day"
+                    className="glass"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Leave empty for full day checkout
+                  </p>
+                </div>
+              )}
 
               <div>
                 <Label htmlFor="paid_amount_entry">Paid Amount</Label>
