@@ -188,7 +188,7 @@ export const MoreTab = () => {
         .reduce((sum, g) => sum + Number(g.paid_amount || 0), 0);
       const grandTotal = sortedGuests.reduce((sum, g) => sum + Number(g.paid_amount || 0), 0);
 
-      // Add table
+      // Add table with proper pagination
       autoTable(doc, {
         head: [['Date', 'Guest Name', 'Total', 'Paid', 'Pending', 'Mode', 'Pay To']],
         body: tableData,
@@ -206,23 +206,21 @@ export const MoreTab = () => {
         alternateRowStyles: {
           fillColor: [245, 247, 250],
         },
-        margin: { top: 40 },
-        didDrawPage: (data) => {
-          // Footer
-          const pageCount = doc.getNumberOfPages();
-          doc.setFontSize(8);
-          doc.setTextColor(128, 128, 128);
-          doc.text(
-            `Page ${data.pageNumber} of ${pageCount}`,
-            doc.internal.pageSize.getWidth() / 2,
-            doc.internal.pageSize.getHeight() - 10,
-            { align: 'center' }
-          );
-        },
+        margin: { top: 20, bottom: 25 },
+        showHead: 'everyPage',
+        tableWidth: 'auto',
       });
 
-      // Add totals summary after table
-      const finalY = (doc as any).lastAutoTable.finalY || 50;
+      // Add totals summary after table - check if we need a new page
+      let finalY = (doc as any).lastAutoTable.finalY || 50;
+      const pageHeight = doc.internal.pageSize.getHeight();
+      
+      // If summary would overflow, add new page
+      if (finalY + 45 > pageHeight) {
+        doc.addPage();
+        finalY = 20;
+      }
+      
       doc.setFontSize(11);
       doc.setTextColor(40, 40, 40);
       doc.text('Payment Summary:', 14, finalY + 10);
@@ -232,6 +230,20 @@ export const MoreTab = () => {
       doc.setFontSize(11);
       doc.setTextColor(59, 130, 246);
       doc.text(`Grand Total Paid: ₹${grandTotal.toLocaleString()}`, 14, finalY + 34);
+
+      // Add page numbers to all pages
+      const totalPages = doc.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(128, 128, 128);
+        doc.text(
+          `Page ${i} of ${totalPages}`,
+          doc.internal.pageSize.getWidth() / 2,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'center' }
+        );
+      }
 
       // Convert PDF to blob/base64 based on platform
       if (isNativePlatform()) {
@@ -321,10 +333,20 @@ export const MoreTab = () => {
           startY: 36,
           theme: 'striped',
           headStyles: { fillColor: [59, 130, 246] },
+          margin: { top: 20, bottom: 25 },
+          showHead: 'everyPage',
+          tableWidth: 'auto',
         });
 
-        // Add totals summary after table
-        const finalY = (doc as any).lastAutoTable.finalY || 50;
+        // Add totals summary after table - check if we need a new page
+        let finalY = (doc as any).lastAutoTable.finalY || 50;
+        const pageHeight = doc.internal.pageSize.getHeight();
+        
+        if (finalY + 45 > pageHeight) {
+          doc.addPage();
+          finalY = 20;
+        }
+        
         doc.setFontSize(11);
         doc.setTextColor(40, 40, 40);
         doc.text('Payment Summary:', 14, finalY + 10);
@@ -334,6 +356,20 @@ export const MoreTab = () => {
         doc.setFontSize(11);
         doc.setTextColor(59, 130, 246);
         doc.text(`Grand Total Paid: ₹${grandTotal.toLocaleString()}`, 14, finalY + 34);
+
+        // Add page numbers to all pages
+        const totalPages = doc.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.setFontSize(8);
+          doc.setTextColor(128, 128, 128);
+          doc.text(
+            `Page ${i} of ${totalPages}`,
+            doc.internal.pageSize.getWidth() / 2,
+            doc.internal.pageSize.getHeight() - 10,
+            { align: 'center' }
+          );
+        }
 
         const pdfData = doc.output('datauristring').split(',')[1];
         const filename = `print-guest-data-${format(new Date(), 'dd-MM-yyyy')}.pdf`;
