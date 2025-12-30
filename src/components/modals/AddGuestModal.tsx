@@ -98,14 +98,15 @@ const PAYMENT_MODES = ['Cash', 'Online'];
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="glass-card w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold neon-text">Add New Guest</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="w-5 h-5" />
-          </Button>
-        </div>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
+      <div className="min-h-full flex items-start justify-center p-4 pt-8 pb-8">
+        <div className="glass-card w-full max-w-md">
+          <div className="flex items-center justify-between mb-6 sticky top-0 bg-inherit z-10">
+            <h2 className="text-xl font-semibold neon-text">Add New Guest</h2>
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
 
         {/* Tab Switcher */}
         <div className="flex gap-2 mb-6 glass p-1 rounded-lg">
@@ -429,6 +430,7 @@ const PAYMENT_MODES = ['Cash', 'Online'];
             </Button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );
