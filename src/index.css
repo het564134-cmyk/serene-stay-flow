@@ -115,9 +115,11 @@ All colors MUST be HSL.
   }
   
   .floating-button {
-    @apply glass-card fixed bottom-24 right-6 w-14 h-14 flex items-center justify-center cursor-pointer hover:scale-110 transition-all duration-300 neon-glow;
-    z-index: 40;
-    position: fixed !important;
+    @apply glass-card w-14 h-14 flex items-center justify-center cursor-pointer hover:scale-110 transition-all duration-300 neon-glow;
+    position: fixed;
+    right: 1rem; /* align above the 'More' tab on the right */
+    bottom: calc(4rem + 1rem); /* tab bar height (4rem) + gap */
+    z-index: 50;
   }
   
   .tab-navigation {
