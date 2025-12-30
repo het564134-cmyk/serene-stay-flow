@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { useGuests, Guest } from '@/hooks/useGuests';
 import { AddGuestModal } from '@/components/modals/AddGuestModal';
 import { EditGuestModal } from '@/components/modals/EditGuestModal';
+import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { format } from 'date-fns';
 
 export const GuestsTab = () => {
@@ -145,9 +146,9 @@ export const GuestsTab = () => {
         </div>
       )}
 
-      <div className="floating-button" onClick={() => setShowAddModal(true)}>
+      <FloatingActionButton ariaLabel="Add guest" onClick={() => setShowAddModal(true)}>
         <Plus className="w-6 h-6" />
-      </div>
+      </FloatingActionButton>
 
       <AddGuestModal 
         isOpen={showAddModal} 

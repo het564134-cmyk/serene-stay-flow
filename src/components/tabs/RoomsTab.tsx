@@ -5,6 +5,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useRooms, type Room } from '@/hooks/useRooms';
 import { AddRoomModal } from '@/components/modals/AddRoomModal';
 import { EditRoomModal } from '@/components/modals/EditRoomModal';
+import { FloatingActionButton } from '@/components/FloatingActionButton';
 
 export const RoomsTab = () => {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -131,9 +132,9 @@ export const RoomsTab = () => {
         </div>
       )}
 
-      <div className="floating-button" onClick={() => setShowAddModal(true)}>
+      <FloatingActionButton ariaLabel="Add room" onClick={() => setShowAddModal(true)}>
         <Plus className="w-6 h-6" />
-      </div>
+      </FloatingActionButton>
 
       <AddRoomModal 
         isOpen={showAddModal} 
