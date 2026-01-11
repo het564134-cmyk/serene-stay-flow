@@ -98,13 +98,13 @@ const PAYMENT_MODES = ['Cash', 'Online'];
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
-      <div className="min-h-full flex items-start justify-center p-4 pt-8 pb-8">
-        <div className="glass-card w-full max-w-md">
-          <div className="flex items-center justify-between mb-6 sticky top-0 bg-inherit z-10">
+    <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+      <div className="min-h-full w-full p-4 pb-8">
+        <div className="w-full max-w-lg mx-auto">
+          <div className="flex items-center justify-between mb-6 sticky top-0 bg-background z-10 py-4 -mx-4 px-4">
             <h2 className="text-xl font-semibold neon-text">Add New Guest</h2>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="w-5 h-5" />
+            <Button variant="ghost" size="icon" onClick={onClose} className="min-w-[44px] min-h-[44px]">
+              <X className="w-6 h-6" />
             </Button>
           </div>
 
