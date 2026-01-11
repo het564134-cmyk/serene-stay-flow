@@ -535,57 +535,45 @@ export const MoreTab = () => {
   const handleClearData = async () => {
     setIsClearing(true);
     try {
-      // Verify password from Supabase
-      const { data: settings, error: settingsError } = await supabase
-        .from('settings')
-        .select('value')
-        .eq('key', 'admin_password')
-        .single();
+      // Map clearType to action for edge function
+      const actionMap = {
+        'all': 'clear_all',
+        'guests': 'clear_guests',
+        'rooms': 'clear_rooms',
+      } as const;
 
-      if (settingsError) throw new Error('Failed to verify password');
+      // Call secure edge function for admin operations
+      const response = await fetch(
+        'https://mqpevmlaeoesuyrboakn.supabase.co/functions/v1/admin-operations',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xcGV2bWxhZW9lc3V5cmJvYWtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzNDk2MzMsImV4cCI6MjA3MzkyNTYzM30.QkFEZkW4_m72-C_xaBNp3lQlNvDUVjhjST0aN0qLgsI',
+          },
+          body: JSON.stringify({
+            action: actionMap[clearType],
+            password: passwordInput,
+          }),
+        }
+      );
 
-      if (settings.value !== passwordInput) {
-        toast({
-          title: "Error",
-          description: "Incorrect password",
-          variant: "destructive",
-        });
-        setIsClearing(false);
-        return;
-      }
+      const result = await response.json();
 
-      // Clear data based on type
-      if (clearType === 'all' || clearType === 'guests') {
-        const { error: guestsError } = await supabase
-          .from('guests')
-          .delete()
-          .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
-        
-        if (guestsError) throw new Error('Failed to clear guest data');
-      }
-
-      if (clearType === 'all' || clearType === 'rooms') {
-        // First clear room assignments in guests
-        await supabase
-          .from('guests')
-          .update({ room_id: null, room_number: null })
-          .neq('id', '00000000-0000-0000-0000-000000000000');
-
-        const { error: roomsError } = await supabase
-          .from('rooms')
-          .delete()
-          .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
-        
-        if (roomsError) throw new Error('Failed to clear room data');
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to perform operation');
       }
 
       toast({
         title: "Success",
-        description: `${clearType === 'all' ? 'All data' : clearType === 'guests' ? 'Guest data' : 'Room data'} cleared successfully`,
+        description: result.message,
       });
 
       setClearDialogOpen(false);
       setPasswordInput('');
+      
+      // Refresh the data by reloading the page
+      window.location.reload();
     } catch (error: any) {
       toast({
         title: "Error",
