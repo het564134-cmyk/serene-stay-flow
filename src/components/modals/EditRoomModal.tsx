@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -87,94 +87,101 @@ export const EditRoomModal = ({ isOpen, onClose, room }: EditRoomModalProps) => 
     onClose();
   };
 
+  if (!isOpen || !room) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="glass-card border-0">
-        <DialogHeader>
-          <DialogTitle className="neon-text">Edit Room</DialogTitle>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="room_number">Room Number</Label>
-            <Input
-              id="room_number"
-              {...register('room_number')}
-              placeholder="Enter room number"
-              className="glass"
-            />
-            {errors.room_number && (
-              <p className="text-sm text-red-400">{errors.room_number.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="room_type">Room Type</Label>
-            <Select value={watchRoomType} onValueChange={(value: 'AC' | 'Non-AC') => setValue('room_type', value)}>
-              <SelectTrigger className="glass">
-                <SelectValue placeholder="Choose room type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="AC">AC Room</SelectItem>
-                <SelectItem value="Non-AC">Non-AC Room</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.room_type && (
-              <p className="text-sm text-red-400">{errors.room_type.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select value={watchStatus} onValueChange={(value: 'Available' | 'Occupied' | 'Maintenance') => setValue('status', value)}>
-              <SelectTrigger className="glass">
-                <SelectValue placeholder="Choose status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Available">Available</SelectItem>
-                <SelectItem value="Occupied">Occupied</SelectItem>
-                <SelectItem value="Maintenance">Maintenance</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.status && (
-              <p className="text-sm text-red-400">{errors.status.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="price">Price per Night (₹)</Label>
-            <Input
-              id="price"
-              type="number"
-              {...register('price')}
-              placeholder="Enter price per night"
-              className="glass"
-            />
-            {errors.price && (
-              <p className="text-sm text-red-400">{errors.price.message}</p>
-            )}
-          </div>
-
-          <div className="flex gap-2 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleClose}
-              disabled={isSubmitting}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1"
-            >
-              {isSubmitting ? 'Updating...' : 'Update Room'}
+    <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+      <div className="min-h-full w-full p-4 pb-8">
+        <div className="w-full max-w-lg mx-auto">
+          <div className="flex items-center justify-between mb-6 sticky top-0 bg-background z-10 py-4 -mx-4 px-4">
+            <h2 className="text-xl font-semibold neon-text">Edit Room</h2>
+            <Button variant="ghost" size="icon" onClick={handleClose} className="min-w-[44px] min-h-[44px]">
+              <X className="w-6 h-6" />
             </Button>
           </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="room_number">Room Number</Label>
+              <Input
+                id="room_number"
+                {...register('room_number')}
+                placeholder="Enter room number"
+                className="glass"
+              />
+              {errors.room_number && (
+                <p className="text-sm text-red-400">{errors.room_number.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="room_type">Room Type</Label>
+              <Select value={watchRoomType} onValueChange={(value: 'AC' | 'Non-AC') => setValue('room_type', value)}>
+                <SelectTrigger className="glass">
+                  <SelectValue placeholder="Choose room type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AC">AC Room</SelectItem>
+                  <SelectItem value="Non-AC">Non-AC Room</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.room_type && (
+                <p className="text-sm text-red-400">{errors.room_type.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select value={watchStatus} onValueChange={(value: 'Available' | 'Occupied' | 'Maintenance') => setValue('status', value)}>
+                <SelectTrigger className="glass">
+                  <SelectValue placeholder="Choose status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Available">Available</SelectItem>
+                  <SelectItem value="Occupied">Occupied</SelectItem>
+                  <SelectItem value="Maintenance">Maintenance</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.status && (
+                <p className="text-sm text-red-400">{errors.status.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="price">Price per Night (₹)</Label>
+              <Input
+                id="price"
+                type="number"
+                {...register('price')}
+                placeholder="Enter price per night"
+                className="glass"
+              />
+              {errors.price && (
+                <p className="text-sm text-red-400">{errors.price.message}</p>
+              )}
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleClose}
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                {isSubmitting ? 'Updating...' : 'Update Room'}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
