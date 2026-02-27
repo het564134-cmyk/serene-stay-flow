@@ -146,6 +146,7 @@ export const useRooms = () => {
     availableRooms,
     isLoading: roomsQuery.isLoading,
     error: roomsQuery.error,
+    refetch: roomsQuery.refetch,
     addRoom,
     updateRoom,
     deleteRoom,

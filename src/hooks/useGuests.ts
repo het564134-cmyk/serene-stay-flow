@@ -193,6 +193,7 @@ export const useGuests = () => {
     pendingGuests,
     isLoading: guestsQuery.isLoading,
     error: guestsQuery.error,
+    refetch: guestsQuery.refetch,
     addGuest,
     updateGuest,
     deleteGuest,

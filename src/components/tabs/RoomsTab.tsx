@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, WifiOff, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useRooms, type Room } from '@/hooks/useRooms';
@@ -11,7 +11,7 @@ export const RoomsTab = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-  const { rooms, isLoading, deleteRoom } = useRooms();
+  const { rooms, isLoading, error, deleteRoom, refetch } = useRooms();
 
   const handleEditRoom = (room: Room) => {
     setSelectedRoom(room);
@@ -41,6 +41,30 @@ export const RoomsTab = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading rooms...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const isNetworkError = errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError');
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center max-w-sm">
+          <WifiOff className="w-12 h-12 text-destructive mx-auto mb-4" />
+          <p className="text-destructive font-semibold mb-2">
+            {isNetworkError ? 'Network Error' : 'Failed to Load Rooms'}
+          </p>
+          <p className="text-sm text-muted-foreground mb-4">
+            {isNetworkError
+              ? 'Unable to connect to the server. Please check your internet connection and try again.'
+              : errorMessage}
+          </p>
+          <Button onClick={() => refetch()} variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Retry
+          </Button>
         </div>
       </div>
     );

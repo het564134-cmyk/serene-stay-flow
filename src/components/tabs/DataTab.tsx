@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Calendar, DollarSign, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calendar, DollarSign, ChevronDown, ChevronUp, WifiOff, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useGuests } from '@/hooks/useGuests';
@@ -8,7 +9,7 @@ import { format, startOfMonth, endOfMonth, isSameDay, parseISO } from 'date-fns'
 export const DataTab = () => {
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [openDates, setOpenDates] = useState<Set<string>>(new Set());
-  const { guests, isLoading, error } = useGuests();
+  const { guests, isLoading, error, refetch } = useGuests();
 
   const toggleDate = (date: string) => {
     const newOpenDates = new Set(openDates);
@@ -92,12 +93,24 @@ export const DataTab = () => {
   }
 
   if (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const isNetworkError = errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError');
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <Calendar className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <p className="text-red-400 mb-2">Failed to load data</p>
-          <p className="text-sm text-muted-foreground">Please try refreshing the page</p>
+        <div className="text-center max-w-sm">
+          <WifiOff className="w-12 h-12 text-destructive mx-auto mb-4" />
+          <p className="text-destructive font-semibold mb-2">
+            {isNetworkError ? 'Network Error' : 'Failed to Load Data'}
+          </p>
+          <p className="text-sm text-muted-foreground mb-4">
+            {isNetworkError
+              ? 'Unable to connect to the server. Please check your internet connection and try again.'
+              : errorMessage}
+          </p>
+          <Button onClick={() => refetch()} variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Retry
+          </Button>
         </div>
       </div>
     );
