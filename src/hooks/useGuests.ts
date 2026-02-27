@@ -86,8 +86,10 @@ export const useGuests = () => {
       if (error) throw error;
       return data as Guest[];
     },
-    staleTime: 30000, // Data stays fresh for 30 seconds
-    gcTime: 300000, // Cache for 5 minutes
+    staleTime: 30000,
+    gcTime: 300000,
+    retry: 2,
+    retryDelay: 1000,
   });
 
   const addGuest = useMutation({
