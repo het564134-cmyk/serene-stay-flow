@@ -26,6 +26,8 @@ export const useExpenses = () => {
       if (error) throw error;
       return data as Expense[];
     },
+    retry: 2,
+    retryDelay: 1000,
   });
 
   const addExpense = useMutation({
