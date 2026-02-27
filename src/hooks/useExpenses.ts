@@ -84,6 +84,7 @@ export const useExpenses = () => {
     expenses: expensesQuery.data || [],
     isLoading: expensesQuery.isLoading,
     error: expensesQuery.error,
+    refetch: expensesQuery.refetch,
     addExpense,
     deleteExpense,
   };

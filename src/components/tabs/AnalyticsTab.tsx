@@ -1,14 +1,17 @@
 import { useMemo } from 'react';
-import { TrendingUp, Users, Home, DollarSign, AlertCircle } from 'lucide-react';
+import { TrendingUp, Users, Home, DollarSign, AlertCircle, WifiOff, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useRooms } from '@/hooks/useRooms';
 import { useGuests } from '@/hooks/useGuests';
 import { useExpenses } from '@/hooks/useExpenses';
 import { format, subDays, startOfDay, endOfDay, isAfter, isBefore } from 'date-fns';
 
 export const AnalyticsTab = () => {
-  const { rooms, isLoading: roomsLoading } = useRooms();
-  const { guests, isLoading: guestsLoading } = useGuests();
-  const { expenses, isLoading: expensesLoading } = useExpenses();
+  const { rooms, isLoading: roomsLoading, error: roomsError, refetch: refetchRooms } = useRooms();
+  const { guests, isLoading: guestsLoading, error: guestsError, refetch: refetchGuests } = useGuests();
+  const { expenses, isLoading: expensesLoading, error: expensesError, refetch: refetchExpenses } = useExpenses();
+
+  const anyError = roomsError || guestsError || expensesError;
 
   const analytics = useMemo(() => {
     if (roomsLoading || guestsLoading || expensesLoading) return null;
@@ -74,6 +77,30 @@ export const AnalyticsTab = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading analytics...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (anyError) {
+    const err = anyError instanceof Error ? anyError.message : 'Unknown error';
+    const isNetworkError = err.includes('Failed to fetch') || err.includes('NetworkError');
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center max-w-sm">
+          <WifiOff className="w-12 h-12 text-destructive mx-auto mb-4" />
+          <p className="text-destructive font-semibold mb-2">
+            {isNetworkError ? 'Network Error' : 'Failed to Load Analytics'}
+          </p>
+          <p className="text-sm text-muted-foreground mb-4">
+            {isNetworkError
+              ? 'Unable to connect to the server. Please check your internet connection and try again.'
+              : err}
+          </p>
+          <Button onClick={() => { refetchRooms(); refetchGuests(); refetchExpenses(); }} variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Retry
+          </Button>
         </div>
       </div>
     );
